@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  testcorewebapi:
+    image: testcorewebapi
+    build:
+      context: ./TestCoreWebApi
+      dockerfile: Dockerfile
