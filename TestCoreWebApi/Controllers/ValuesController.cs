@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using IBM.Data.DB2.Core;
 
 namespace TestCoreWebApi.Controllers
 {
@@ -13,7 +14,37 @@ namespace TestCoreWebApi.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1", "value2" };
+            var values = new List<string>();
+            string connectionString = "Server=10.1.1.1:446;Database=ESCTEST;UID=USER;PWD=p1234567;";
+            string mySelectQuery = "SELECT * FROM SHARLIB.DCPF66";
+            var myConnection = new DB2Connection(connectionString);
+            DB2Command myCommand = new DB2Command(mySelectQuery, myConnection);
+            try
+            {
+                myConnection.Open();
+                DB2DataReader myReader;
+                myReader = myCommand.ExecuteReader();
+                // Always call Read before accessing data.
+                while (myReader.Read())
+                {
+                   values.Add(myReader.GetString(0));
+                }
+                // always call Close when done reading.
+                myReader.Close();
+            }
+            catch (Exception ex)
+            {
+                values = new List<string>();
+                values.Add(ex.Message);
+                throw;
+            }
+            finally
+            {
+                // Close the connection when done with it.
+                myConnection.Close();
+            }
+
+            return values.ToArray();
         }
 
         // GET api/values/5
